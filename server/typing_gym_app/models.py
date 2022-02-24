@@ -3,9 +3,7 @@ from django.db import models
 class User(models.Model):
   username = models.CharField(max_length=12)
   password = models.TextField()
-  def words_default():
-    return {"test" : 0}
-  words = models.JSONField(default = words_default())
+
 # Create your models here.
 # use the django default user for the user
 # ideas: burst generates one, type asap, Typing test: 2 min timer, type until the wpm goes down past a certain level, Practice: need 100% accuracy, if you miss you need to retype 3 times
