@@ -19,3 +19,4 @@ toml==0.10.2
 tzdata==2021.5
 urllib3==1.26.7
 wincertstore==0.2
+pyrebase==3.0.27
