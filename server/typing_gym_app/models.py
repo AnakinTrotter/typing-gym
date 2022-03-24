@@ -1,53 +1,30 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib import messages
 # Create your models here.
 # use the django default user for the user
 # ideas: burst generates one, type asap, Typing test: 2 min timer, type until the wpm goes down past a certain level, Practice: need 100% accuracy, if you miss you need to retype 3 times
 # Look ahead: as they type a word it disappears, if they get a word wrong it reshows up, a counter will go up and count which whords they missed the most, have a leaderboard for players.
-class MyAccountManager(BaseUserManager):
-    def create_user(self, username, password):
-        user = self.model(
-            username=username,
-            password = password
-        )
-
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, Email_Address, password):
-        user = self.create_user(
-            Email_Address=self.normalize_email(Email_Address),
-            password=password,
-        )
-        user.is_admin = True
-        user.is_active=True
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-
-class Users(AbstractBaseUser):
-    username= models.CharField(max_length=30,unique=True, blank=True, null=True)
-    is_staff = models.BooleanField(default=False)
-    is_super_teacher = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-
-    USERNAME_FIELD = 'Username'
-
-    objects = MyAccountManager()
-
-    class Meta:
-        db_table = "tbl_users"
-
-    def __str__(self):
-        return str(self.username)
+class UserManager(models.Manager):
+    def basic_validator(self, post_data):
+        errors = {}
+        try:
+            if len(post_data["username_input"]) > 15:
+                errors["username_input"] = "Username should be 15 characters long or less."
+            elif len(post_data["username_input"]) < 2:
+                errors["username_input"] = "Username should be at least 2 characters long."
+            if len(post_data["password_input"]) < 8:
+                errors["password_input"] = "Password should be at least 8 characters long."
+        except:
+            errors["unknown_error"] = "An unknown error has occured."
+        return errors
 
 
-    def has_perm(self, perm, obj=None): return self.is_superuser
-
-    def has_module_perms(self, app_label): return self.is_superuser
-
-
+class User(models.Model):
+    objects = UserManager()
+    username = models.CharField(max_length=15)
+    name = models.TextField(default="Anonymous Typing Gymnast")
+    password = models.TextField()
 
 
 # endpoints:
