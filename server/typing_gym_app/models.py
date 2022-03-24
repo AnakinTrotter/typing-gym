@@ -49,7 +49,6 @@ class Users(AbstractBaseUser):
 
 
 
-class Leaderboard(models.Manager):
 
 # endpoints:
 # GETS:
