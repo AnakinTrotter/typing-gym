@@ -21,7 +21,33 @@ database=firebase.database()
 
 def index(request):
     leader1 = database.child('Leaderboard').child('Position 1').child('Accuracy').get().val()
-    return HttpResponse(leader1)
+    if 'user_id' not in request.session:
+            request.session['user_id'] = ""
+    if not database.child('Users').child(request.session['user_id']).get().val() == "None":
+         return HttpResponse("Not logged in")
+    else:
+        logedInName = database.child('Users').child(request.session['user_id']).child('Username').get().val()
+
+    return HttpResponse(logedInName)
+def logout(request):
+    request.session['user_id'] = ""
+    return redirect("/login")
+
+
+def login(request):
+    if request.method == "POST":
+        user = User.objects.filter(username=request.POST['username_input'])
+        if len(user) <= 0:
+            messages.error(request, "The username does")
+            return redirect("/login")
+        if bcrypt.checkpw(request.POST['password_input'].encode(), user[0].password.encode()):
+            request.session['user_id'] = request.POST['username_input']
+            return redirect("/")
+        else:
+            print(user[0].password.encode())
+            messages.error(request, "Incorrect username or password.")
+            return redirect("/login")
+    return render(request, 'login.html')
 
 def register(request):
     if request.method == "POST":
@@ -41,7 +67,7 @@ def register(request):
                 "Highest Score" : 1,
                 "Leaderboard positions" : {
                     "Position 1" : 1
-                },
+                       },
                 "Password" : pw_hash,
                 "Username" : request.POST["username_input"],
                 "Word List" : {
@@ -247,5 +273,6 @@ def register(request):
                     "line": 0
                 }
         })
-        
+        user = User.objects.create(
+            username=request.POST["username_input"], password=pw_hash)
     return render(request, 'register.html')
