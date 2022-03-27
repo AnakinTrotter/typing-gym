@@ -1,3 +1,4 @@
+from dis import dis
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib import messages
@@ -25,6 +26,23 @@ class User(models.Model):
     username = models.CharField(max_length=15)
     name = models.TextField(default="Anonymous Typing Gymnast")
     password = models.TextField()
+    #to make add a submission make a new submission with user as its user
+
+
+class Submission(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    wpm = models.IntegerField(default=0)
+    accuracy = models.FloatField(default=100)
+    dissapearing = models.IntegerField(default=0)
+
+    #not certain if this is how u override for django argh
+    def __gt__(self, other):
+        return (self.wpm > other.wpm) if (self.wpm != other.wpm) else ((self.accuracy > other.accuracy) if self.accuracy != other.accuracy else (self.dissapearing > other.dissapearing))
+
+    def __eq__(self, other):
+        return (self.wpm == other.wpm and self.accuracy == other.accuracy and self.dissapearing == other.dissapearing)
+
 
 
 # endpoints:
@@ -38,6 +56,7 @@ class User(models.Model):
 # POSTS:
 # /leaderboard/update, Check if user is logged in with the authentication token, update learderboard position
 # /user/update, Called after each round, update word counts, and check if user has a new high record
+# /user/update/highscore, Called after each round, update high score
 
 
 # model:
